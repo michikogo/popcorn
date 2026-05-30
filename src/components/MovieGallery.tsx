@@ -32,7 +32,7 @@ const MovieGallery = ({ movies, loading, error, layout }: Props) => {
 
   const containerClass =
     layout === 'list'
-      ? 'flex flex-col gap-3'
+      ? 'flex flex-col gap-5'
       : 'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
 
   return (
