@@ -8,6 +8,7 @@ const App = () => {
   const [sortBy, setSortBy] = useState('popularity.desc')
   const [genreId, setGenreId] = useState<number | null>(null)
   const [year, setYear] = useState<number | null>(null)
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid')
 
   const { genres } = useGenres()
   const { movies, loading, error } = useMovies({ sortBy, genreId, year })
@@ -22,12 +23,14 @@ const App = () => {
             sortBy={sortBy}
             genreId={genreId}
             year={year}
+            layout={layout}
             onSortChange={setSortBy}
             onGenreChange={setGenreId}
             onYearChange={setYear}
+            onLayoutChange={setLayout}
           />
         </div>
-        <MovieGrid movies={movies} loading={loading} error={error} />
+        <MovieGrid movies={movies} loading={loading} error={error} layout={layout} />
       </div>
     </div>
   )
