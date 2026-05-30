@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { Movie } from '../types/tmdb'
 import getPosterUrl from '../api/getPosterUrl'
 import NoPoster from './NoPoster'
@@ -8,16 +8,22 @@ interface Props {
 }
 
 const MovieCard = ({ movie }: Props) => {
+  const [imageLoaded, setImageLoaded] = useState(false)
+
   return (
     <div className="group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl">
-      <div className="aspect-[2/3] w-full">
+      <div className="relative aspect-[2/3] w-full">
         {movie.poster_path ? (
-          <img
-            src={getPosterUrl(movie.poster_path)}
-            alt={movie.title}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+          <>
+            {!imageLoaded && <div className="absolute inset-0 animate-shimmer" />}
+            <img
+              src={getPosterUrl(movie.poster_path)}
+              alt={movie.title}
+              className={`h-full w-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+            />
+          </>
         ) : (
           <NoPoster />
         )}
