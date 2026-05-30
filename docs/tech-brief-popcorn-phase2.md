@@ -16,6 +16,7 @@ Already shipped in Phase 1 that counted as Phase 2 scope:
 
 - **Responsive grid** — `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` in `MovieGrid`
 - **Skeleton shimmer** — `@keyframes shimmer` + per-image fade-in in `MovieCard`
+- **CSS transitions on filter/sort changes** — covered by the per-image shimmer; each new card fades in individually as its poster loads, making a separate grid-level fade transition redundant
 
 ---
 
