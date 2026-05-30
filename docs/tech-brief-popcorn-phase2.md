@@ -182,12 +182,14 @@ New/changed params:
   - Bump rating ring to `ring-2` for ≥8 / `ring-1` for ≥7 (border weight as accessibility signal)
   - Increase grid gap to `gap-6` (room for `hover:scale-105`) and list gap to `gap-5`
 
-- **MR 4 — Infinite Scroll**
-  - Add `page` and `totalPages` state to `useMovies`
-  - Append results on page increment, reset on filter/sort change
-  - Add `IntersectionObserver` sentinel to `MovieGallery` with `rootMargin: '500px'`
-  - Add AbortController to `useMovies` to cancel stale fetches
-  - Show spinner below grid during next-page fetch
+- **[PR #16](https://github.com/michikogo/popcorn/pull/16) — Infinite Scroll** ✅
+  - Add `page`, `totalPages`, `loadingMore`, and `loadMore` to `useMovies`
+  - Append results on page increment; replace on filter/sort change
+  - Filter reset uses React's getDerivedStateFromProps pattern to avoid synchronous setState in effects
+  - `AbortController` on every fetch — cleanup cancels in-flight requests on filter change or unmount
+  - `IntersectionObserver` sentinel in `MovieGallery` with `rootMargin: '500px'`
+  - Spinner shown below grid during next-page fetch; sentinel removed when last page reached
+  - Set `:root { background-color: var(--color-zinc-950) }` in `index.css`
 
 ## Open Questions
 
