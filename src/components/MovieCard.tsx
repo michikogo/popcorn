@@ -38,10 +38,11 @@ const MovieCard = ({ movie }: Props) => {
       </div>
       <div className="p-3">
         <h3 className="truncate text-sm font-semibold text-white">{movie.title}</h3>
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1 flex items-center gap-1">
           <span className="text-yellow-400">★</span>
           <span className="text-xs text-zinc-400">{movie.vote_average.toFixed(1)}</span>
-          <span className="text-xs text-zinc-500">{movie.release_date?.slice(0, 4)}</span>
+          <span className="text-xs text-zinc-400">·</span>
+          <span className="text-xs text-zinc-400">{movie.release_date?.slice(0, 4)}</span>
         </div>
       </div>
     </div>
