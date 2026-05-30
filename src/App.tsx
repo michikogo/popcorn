@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import useMovies from './hooks/useMovies'
 import useGenres from './hooks/useGenres'
 import FilterBar from './components/FilterBar'
-import MovieGrid from './components/MovieGrid'
+import MovieGallery from './components/MovieGallery'
 
 const App = () => {
   const [sortBy, setSortBy] = useState('popularity.desc')
@@ -30,7 +30,7 @@ const App = () => {
             onLayoutChange={setLayout}
           />
         </div>
-        <MovieGrid movies={movies} loading={loading} error={error} layout={layout} />
+        <MovieGallery movies={movies} loading={loading} error={error} layout={layout} />
       </div>
     </div>
   )

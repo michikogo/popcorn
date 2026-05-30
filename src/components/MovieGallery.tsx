@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Movie } from '../types/tmdb'
 import MovieCard from './MovieCard'
+import MovieListItem from './MovieListItem'
 import SkeletonCard from './SkeletonCard'
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 const SKELETON_COUNT = 10
 
-const MovieGrid = ({ movies, loading, error, layout }: Props) => {
+const MovieGallery = ({ movies, loading, error, layout }: Props) => {
   if (error) {
     return (
       <div className="flex items-center justify-center py-24 text-zinc-400">
@@ -38,9 +39,11 @@ const MovieGrid = ({ movies, loading, error, layout }: Props) => {
     <div className={containerClass}>
       {loading
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SkeletonCard key={i} />)
-        : movies.map((movie) => <MovieCard key={movie.id} movie={movie} layout={layout} />)}
+        : layout === 'list'
+          ? movies.map((movie) => <MovieListItem key={movie.id} movie={movie} />)
+          : movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)}
     </div>
   )
 }
 
-export default MovieGrid
+export default MovieGallery
