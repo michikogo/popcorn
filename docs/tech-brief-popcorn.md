@@ -27,17 +27,17 @@ Data flow:
   useMovies → GET /discover/movie?params   → populates MovieGrid (re-fetches on filter/sort change)
 ```
 
-| Component                                                 | Type            | Role                                                         |
-| --------------------------------------------------------- | --------------- | ------------------------------------------------------------ |
-| `App`                                                     | React component | Root — holds filter/sort state, passes to hooks and children |
-| `FilterBar`                                               | React component | Genre dropdown, year dropdown, sort dropdown                 |
-| `MovieGrid`                                               | React component | Renders grid of `MovieCard` or `SkeletonCard`                |
-| `MovieCard`                                               | React component | Poster, title, rating — reusable, no internal state          |
-| `SkeletonCard`                                            | React component | Placeholder shown while `useMovies` is loading               |
-| `useMovies`                                               | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
-| `useGenres`                                               | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
-| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module      | Fetch wrappers, URL builder, reads env key                   |
-| `types/tmdb.ts`                                           | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
+| Component                                                 | Type            | Role                                                             |
+| --------------------------------------------------------- | --------------- | ---------------------------------------------------------------- |
+| `App`                                                     | React component | Root — holds filter/sort state, passes to hooks and children     |
+| `FilterBar`                                               | React component | Genre dropdown, year dropdown, sort dropdown                     |
+| `MovieGrid`                                               | React component | Renders grid of `MovieCard` or `SkeletonCard`                    |
+| `MovieCard`                                               | React component | Poster, title, rating — tracks `imageLoaded` for shimmer fade-in |
+| `SkeletonCard`                                            | React component | Placeholder shown while `useMovies` is loading                   |
+| `useMovies`                                               | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change         |
+| `useGenres`                                               | Custom hook     | Fetches `/genre/movie/list` once on mount                        |
+| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module      | Fetch wrappers, URL builder, reads env key                       |
+| `types/tmdb.ts`                                           | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces                  |
 
 ## Data Model
 
@@ -129,7 +129,7 @@ Image base URL: https://image.tmdb.org/t/p/w500{poster_path}
 
 ### Tailwind CSS for all styling
 
-- **Chosen:** Tailwind utility classes; custom keyframe in `tailwind.config.ts` for skeleton shimmer
+- **Chosen:** Tailwind utility classes; custom `@keyframes shimmer` and `.animate-shimmer` utility in `index.css`
 - **Alternatives:** CSS Modules, plain CSS, Styled Components
 - **Rationale:** Fastest path to a polished UI — hover transitions, responsive grid, and skeleton animation all handled without leaving the component file
 - **Tradeoff:** Class strings on components can get verbose at this scale
@@ -201,15 +201,16 @@ src/
   - `useGenres` hook — fetches once on mount
   - `useMovies` hook — re-fetches on filter/sort change, returns movies, loading, error
 
-- **[PR #8](https://github.com/michikogo/popcorn/pull/8) — UI Components**
-  - `SkeletonCard` — pulsing placeholder card
-  - `MovieCard` — poster, title, rating badge, hover effect (`hover:scale-105 hover:shadow-xl`), lazy image loading
+- **[PR #8](https://github.com/michikogo/popcorn/pull/8) — UI Components** ✅
+  - `SkeletonCard` — shimmer placeholder card
+  - `MovieCard` — poster, title, rating badge, hover effect (`hover:scale-105 hover:shadow-xl`), lazy image loading, shimmer fade-in on load
   - `MovieGrid` — renders `MovieCard` grid, skeleton state, empty state, error state
   - `App` — wired to `useMovies` with default sort for preview; FilterBar wiring in next MR
 
-- **MR — FilterBar + App Wiring**
-  - `FilterBar` — genre dropdown, year dropdown (2020–2025), sort dropdown
+- **[PR #9](https://github.com/michikogo/popcorn/pull/9) — FilterBar + App Wiring** ✅
+  - `FilterBar` — genre dropdown, year dropdown (2020–2025), sort dropdown; stateless, props-driven
   - `App` — holds filter/sort state, wires `useMovies` and `useGenres` to `FilterBar` and `MovieGrid`
+  - Shimmer keyframe added to `index.css`; skeleton count reduced to 10 (2 rows at desktop)
   - Default sort: `popularity.desc`
 
 ## Open Questions
