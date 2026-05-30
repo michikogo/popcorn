@@ -26,18 +26,19 @@ No new components or hooks introduced until MR 4 (infinite scroll). Existing com
 
 ```
 App
-  ├── FilterBar  (+ list/grid toggle, + year range from/to)
-  └── MovieGrid  (+ list layout mode)
-        ├── MovieCard (+ glow border, + Top Rated ribbon)
+  ├── FilterBar     (+ list/grid toggle, + year range from/to)
+  └── MovieGallery  (renamed from MovieGrid; + list layout mode)
+        ├── MovieCard     (grid only)
+        ├── MovieListItem (list only — new component)
         └── SkeletonCard
 ```
 
-| Change                         | Affects                                      | Notes                                             |
-| ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
-| Rating visuals (glow + ribbon) | `MovieCard`                                  | Pure Tailwind, no new state                       |
-| List view toggle               | `App`, `FilterBar`, `MovieCard`, `MovieGrid` | `layout` state in App                             |
-| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`      | Replaces single year param with `gte`/`lte`       |
-| Infinite scroll                | `useMovies`, `MovieGrid`                     | IntersectionObserver sentinel, page state in hook |
+| Change                         | Affects                                              | Notes                                             |
+| ------------------------------ | ---------------------------------------------------- | ------------------------------------------------- |
+| Rating visuals (glow + ribbon) | `MovieCard`                                          | Pure Tailwind, no new state                       |
+| List view toggle               | `App`, `FilterBar`, `MovieGallery`, `MovieListItem`  | `layout` state in App; list mode extracted to its own component |
+| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`              | Replaces single year param with `gte`/`lte`       |
+| Infinite scroll                | `useMovies`, `MovieGallery`                          | IntersectionObserver sentinel, page state in hook |
 
 ---
 
@@ -59,9 +60,9 @@ Glow via Tailwind `ring` + `shadow`. Ribbon is an absolutely-positioned `<span>`
 
 `layout: 'grid' | 'list'` state in `App`, defaulting to `'grid'`.
 
-- Toggle button added to `FilterBar`
-- `MovieGrid` switches between `grid` and `flex flex-col` layout based on prop
-- `MovieCard` renders differently in list mode: poster fixed at `w-24`, title + rating displayed to the right, full row width
+- Toggle button (⊞ / ☰) added to `FilterBar`, right-aligned with `ml-auto`
+- `MovieGrid` renamed to `MovieGallery`; switches between `grid` and `flex flex-col gap-3` container based on `layout` prop
+- List mode extracted into a dedicated `MovieListItem` component (poster fixed at `w-14 h-20`, title + rating to the right, full row width); `MovieCard` remains grid-only
 
 ### Year Range Filter
 
@@ -157,11 +158,12 @@ New/changed params:
   - Add "Top Rated" ribbon overlay to `MovieCard` for `vote_average ≥ 8`
   - `getRatingClasses` utility extracted to `src/utils/getRatingClasses.ts`
 
-- **MR 2 — List View**
+- **[PR #14](https://github.com/michikogo/popcorn/pull/14) — List View** ✅
   - Add `layout: 'grid' | 'list'` state to `App`
-  - Add toggle button to `FilterBar`
-  - Update `MovieGrid` to switch between grid and flex-col layout
-  - Update `MovieCard` to render list mode (poster left, info right)
+  - Add ⊞ / ☰ toggle button to `FilterBar` (`ml-auto`, segmented style)
+  - Rename `MovieGrid` → `MovieGallery`; switch container between grid and `flex flex-col gap-3` based on `layout`
+  - Extract list layout into new `MovieListItem` component; keep `MovieCard` grid-only
+  - Document unicode-over-Heroicons decision in `docs/decisions.md`
 
 - **MR 3 — Year Range Filter**
   - Replace `year` with `yearFrom` / `yearTo` in `FilterBar` props, `useMovies`, and `fetchMovies`
@@ -170,7 +172,7 @@ New/changed params:
 - **MR 4 — Infinite Scroll**
   - Add `page` and `totalPages` state to `useMovies`
   - Append results on page increment, reset on filter/sort change
-  - Add `IntersectionObserver` sentinel to `MovieGrid` with `rootMargin: '500px'`
+  - Add `IntersectionObserver` sentinel to `MovieGallery` with `rootMargin: '500px'`
   - Add AbortController to `useMovies` to cancel stale fetches
   - Show spinner below grid during next-page fetch
 
