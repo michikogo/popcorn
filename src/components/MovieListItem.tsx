@@ -8,16 +8,16 @@ interface Props {
   movie: Movie
 }
 
-const MovieCard = ({ movie }: Props) => {
+const MovieListItem = ({ movie }: Props) => {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   return (
     <div
-      className={`group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl ${getRatingClasses(movie.vote_average)}`}
+      className={`flex cursor-pointer items-center gap-4 rounded-xl bg-zinc-800 p-3 transition duration-300 hover:bg-zinc-700 ${getRatingClasses(movie.vote_average)}`}
     >
-      <div className="relative aspect-[2/3] w-full">
+      <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg">
         {movie.vote_average >= 8 && (
-          <span className="absolute left-0 top-3 z-10 rounded-r-md bg-yellow-400 px-2 py-0.5 text-xs font-bold text-zinc-900">
+          <span className="absolute left-0 top-1 z-10 rounded-r bg-yellow-400 px-1 py-0.5 text-[9px] font-bold leading-none text-zinc-900">
             Top Rated
           </span>
         )}
@@ -36,15 +36,15 @@ const MovieCard = ({ movie }: Props) => {
           <NoPoster />
         )}
       </div>
-      <div className="p-3">
-        <h3 className="truncate text-sm font-semibold text-white">{movie.title}</h3>
+      <div className="min-w-0">
+        <h3 className="truncate font-semibold text-white">{movie.title}</h3>
         <div className="mt-1 flex items-center gap-1">
           <span className="text-yellow-400">★</span>
-          <span className="text-xs text-zinc-400">{movie.vote_average.toFixed(1)}</span>
+          <span className="text-sm text-zinc-400">{movie.vote_average.toFixed(1)}</span>
         </div>
       </div>
     </div>
   )
 }
 
-export default MovieCard
+export default MovieListItem
