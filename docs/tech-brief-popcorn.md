@@ -27,17 +27,17 @@ Data flow:
   useMovies → GET /discover/movie?params   → populates MovieGrid (re-fetches on filter/sort change)
 ```
 
-| Component       | Type            | Role                                                         |
-| --------------- | --------------- | ------------------------------------------------------------ |
-| `App`           | React component | Root — holds filter/sort state, passes to hooks and children |
-| `FilterBar`     | React component | Genre dropdown, year dropdown, sort dropdown                 |
-| `MovieGrid`     | React component | Renders grid of `MovieCard` or `SkeletonCard`                |
-| `MovieCard`     | React component | Poster, title, rating — reusable, no internal state          |
-| `SkeletonCard`  | React component | Placeholder shown while `useMovies` is loading               |
-| `useMovies`     | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
-| `useGenres`     | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
-| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module | Fetch wrappers, URL builder, reads env key |
-| `types/tmdb.ts` | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
+| Component                                                 | Type            | Role                                                         |
+| --------------------------------------------------------- | --------------- | ------------------------------------------------------------ |
+| `App`                                                     | React component | Root — holds filter/sort state, passes to hooks and children |
+| `FilterBar`                                               | React component | Genre dropdown, year dropdown, sort dropdown                 |
+| `MovieGrid`                                               | React component | Renders grid of `MovieCard` or `SkeletonCard`                |
+| `MovieCard`                                               | React component | Poster, title, rating — reusable, no internal state          |
+| `SkeletonCard`                                            | React component | Placeholder shown while `useMovies` is loading               |
+| `useMovies`                                               | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
+| `useGenres`                                               | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
+| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module      | Fetch wrappers, URL builder, reads env key                   |
+| `types/tmdb.ts`                                           | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
 
 ## Data Model
 
@@ -188,7 +188,7 @@ src/
   - GitHub Actions CI pipeline
   - PR template
 
-- **[PR #6](https://github.com/michikogo/popcorn/pull/6) — Tailwind Setup**
+- **[PR #6](https://github.com/michikogo/popcorn/pull/6) — Tailwind Setup** ✅
   - Install Tailwind CSS v4 + Vite plugin
   - Add `@import 'tailwindcss'` to `index.css`
   - Placeholder `MovieCard` to verify Tailwind works
@@ -201,10 +201,11 @@ src/
   - `useGenres` hook — fetches once on mount
   - `useMovies` hook — re-fetches on filter/sort change, returns movies, loading, error
 
-- **MR — UI Components**
+- **[PR #8](https://github.com/michikogo/popcorn/pull/8) — UI Components**
   - `SkeletonCard` — pulsing placeholder card
   - `MovieCard` — poster, title, rating badge, hover effect (`hover:scale-105 hover:shadow-xl`), lazy image loading
   - `MovieGrid` — renders `MovieCard` grid, skeleton state, empty state, error state
+  - `App` — wired to `useMovies` with default sort for preview; FilterBar wiring in next MR
 
 - **MR — FilterBar + App Wiring**
   - `FilterBar` — genre dropdown, year dropdown (2020–2025), sort dropdown
@@ -213,7 +214,7 @@ src/
 
 ## Open Questions
 
-| Question                 | Owner    | Due                          |
-| ------------------------ | -------- | ---------------------------- |
-| ~~Default sort on load~~ | Resolved | `popularity.desc`            |
-| ~~Fallback image~~       | Resolved | Local asset in `src/assets/` |
+| Question                 | Owner    | Due                                       |
+| ------------------------ | -------- | ----------------------------------------- |
+| ~~Default sort on load~~ | Resolved | `popularity.desc`                         |
+| ~~Fallback image~~       | Resolved | `NoPoster` component in `src/components/` |
