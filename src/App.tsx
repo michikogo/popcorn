@@ -12,7 +12,12 @@ const App = () => {
   const [layout, setLayout] = useState<'grid' | 'list'>('grid')
 
   const { genres } = useGenres()
-  const { movies, loading, error } = useMovies({ sortBy, genreId, yearFrom, yearTo })
+  const { movies, loading, loadingMore, error, page, totalPages, loadMore } = useMovies({
+    sortBy,
+    genreId,
+    yearFrom,
+    yearTo,
+  })
 
   return (
     <div className="min-h-screen bg-zinc-950 p-8">
@@ -33,7 +38,16 @@ const App = () => {
             onLayoutChange={setLayout}
           />
         </div>
-        <MovieGallery movies={movies} loading={loading} error={error} layout={layout} />
+        <MovieGallery
+          movies={movies}
+          loading={loading}
+          loadingMore={loadingMore}
+          error={error}
+          layout={layout}
+          page={page}
+          totalPages={totalPages}
+          onLoadMore={loadMore}
+        />
       </div>
     </div>
   )
