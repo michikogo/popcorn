@@ -13,20 +13,28 @@ interface Props {
   genres: Genre[]
   sortBy: string
   genreId: number | null
-  year: number | null
+  yearFrom: number | null
+  yearTo: number | null
+  layout: 'grid' | 'list'
   onSortChange: (value: string) => void
   onGenreChange: (value: number | null) => void
-  onYearChange: (value: number | null) => void
+  onYearFromChange: (value: number | null) => void
+  onYearToChange: (value: number | null) => void
+  onLayoutChange: (value: 'grid' | 'list') => void
 }
 
 const FilterBar = ({
   genres,
   sortBy,
   genreId,
-  year,
+  yearFrom,
+  yearTo,
+  layout,
   onSortChange,
   onGenreChange,
-  onYearChange,
+  onYearFromChange,
+  onYearToChange,
+  onLayoutChange,
 }: Props) => {
   return (
     <div className="flex flex-wrap gap-3">
@@ -56,17 +64,45 @@ const FilterBar = ({
       </select>
 
       <select
-        value={year ?? ''}
-        onChange={(e) => onYearChange(e.target.value ? Number(e.target.value) : null)}
+        value={yearFrom ?? ''}
+        onChange={(e) => onYearFromChange(e.target.value ? Number(e.target.value) : null)}
         className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zinc-600"
       >
-        <option value="">All Years</option>
+        <option value="">From</option>
         {YEARS.map((y) => (
           <option key={y} value={y}>
             {y}
           </option>
         ))}
       </select>
+
+      <select
+        value={yearTo ?? ''}
+        onChange={(e) => onYearToChange(e.target.value ? Number(e.target.value) : null)}
+        className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-zinc-600"
+      >
+        <option value="">To</option>
+        {YEARS.map((y) => (
+          <option key={y} value={y} disabled={yearFrom !== null && y < yearFrom}>
+            {y}
+          </option>
+        ))}
+      </select>
+
+      <div className="ml-auto flex overflow-hidden rounded-lg">
+        <button
+          onClick={() => onLayoutChange('grid')}
+          className={`px-3 py-2 text-sm transition-colors ${layout === 'grid' ? 'bg-zinc-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+        >
+          ⊞
+        </button>
+        <button
+          onClick={() => onLayoutChange('list')}
+          className={`px-3 py-2 text-sm transition-colors ${layout === 'list' ? 'bg-zinc-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+        >
+          ☰
+        </button>
+      </div>
     </div>
   )
 }

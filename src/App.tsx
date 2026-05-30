@@ -2,15 +2,17 @@ import React, { useState } from 'react'
 import useMovies from './hooks/useMovies'
 import useGenres from './hooks/useGenres'
 import FilterBar from './components/FilterBar'
-import MovieGrid from './components/MovieGrid'
+import MovieGallery from './components/MovieGallery'
 
 const App = () => {
   const [sortBy, setSortBy] = useState('popularity.desc')
   const [genreId, setGenreId] = useState<number | null>(null)
-  const [year, setYear] = useState<number | null>(null)
+  const [yearFrom, setYearFrom] = useState<number | null>(null)
+  const [yearTo, setYearTo] = useState<number | null>(null)
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid')
 
   const { genres } = useGenres()
-  const { movies, loading, error } = useMovies({ sortBy, genreId, year })
+  const { movies, loading, error } = useMovies({ sortBy, genreId, yearFrom, yearTo })
 
   return (
     <div className="min-h-screen bg-zinc-950 p-8">
@@ -21,13 +23,17 @@ const App = () => {
             genres={genres}
             sortBy={sortBy}
             genreId={genreId}
-            year={year}
+            yearFrom={yearFrom}
+            yearTo={yearTo}
+            layout={layout}
             onSortChange={setSortBy}
             onGenreChange={setGenreId}
-            onYearChange={setYear}
+            onYearFromChange={setYearFrom}
+            onYearToChange={setYearTo}
+            onLayoutChange={setLayout}
           />
         </div>
-        <MovieGrid movies={movies} loading={loading} error={error} />
+        <MovieGallery movies={movies} loading={loading} error={error} layout={layout} />
       </div>
     </div>
   )

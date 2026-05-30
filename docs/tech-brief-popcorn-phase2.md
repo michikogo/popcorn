@@ -14,7 +14,7 @@ Phase 2 extends the Phase 1 movie discovery grid with four features: rating-base
 
 Already shipped in Phase 1 that counted as Phase 2 scope:
 
-- **Responsive grid** — `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` in `MovieGrid`
+- **Responsive grid** — `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` in `MovieGallery`
 - **Skeleton shimmer** — `@keyframes shimmer` + per-image fade-in in `MovieCard`
 - **CSS transitions on filter/sort changes** — covered by the per-image shimmer; each new card fades in individually as its poster loads, making a separate grid-level fade transition redundant
 
@@ -33,12 +33,12 @@ App
         └── SkeletonCard
 ```
 
-| Change                         | Affects                                              | Notes                                             |
-| ------------------------------ | ---------------------------------------------------- | ------------------------------------------------- |
-| Rating visuals (glow + ribbon) | `MovieCard`                                          | Pure Tailwind, no new state                       |
-| List view toggle               | `App`, `FilterBar`, `MovieGallery`, `MovieListItem`  | `layout` state in App; list mode extracted to its own component |
-| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`              | Replaces single year param with `gte`/`lte`       |
-| Infinite scroll                | `useMovies`, `MovieGallery`                          | IntersectionObserver sentinel, page state in hook |
+| Change                         | Affects                                             | Notes                                                           |
+| ------------------------------ | --------------------------------------------------- | --------------------------------------------------------------- |
+| Rating visuals (glow + ribbon) | `MovieCard`                                         | Pure Tailwind, no new state                                     |
+| List view toggle               | `App`, `FilterBar`, `MovieGallery`, `MovieListItem` | `layout` state in App; list mode extracted to its own component |
+| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`             | Replaces single year param with `gte`/`lte`                     |
+| Infinite scroll                | `useMovies`, `MovieGallery`                         | IntersectionObserver sentinel, page state in hook               |
 
 ---
 
@@ -79,7 +79,7 @@ Page-based fetch appended to existing results.
 
 - `page` state added to `useMovies`, starting at `1`
 - `totalPages` exposed from hook (from `DiscoverResponse.total_pages`)
-- `IntersectionObserver` on a sentinel `<div>` at the bottom of `MovieGrid`
+- `IntersectionObserver` on a sentinel `<div>` at the bottom of `MovieGallery`
 - Sentinel fires when ~5 rows from viewport bottom (`rootMargin: '500px'`)
 - On trigger: increment `page` in `useMovies` — new fetch runs, results appended (`setMovies(prev => [...prev, ...data.results])`)
 - Filter/sort change resets `page` to `1` and clears `movies` to `[]`
