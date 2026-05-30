@@ -6,14 +6,53 @@ import NoPoster from './NoPoster'
 
 interface Props {
   movie: Movie
+  layout?: 'grid' | 'list'
 }
 
-const MovieCard = ({ movie }: Props) => {
+const MovieCard = ({ movie, layout = 'grid' }: Props) => {
   const [imageLoaded, setImageLoaded] = useState(false)
+  const glowClass = getRatingClasses(movie.vote_average)
+
+  if (layout === 'list') {
+    return (
+      <div
+        className={`flex cursor-pointer items-center gap-4 rounded-xl bg-zinc-800 p-3 transition duration-300 hover:bg-zinc-700 ${glowClass}`}
+      >
+        <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg">
+          {movie.vote_average >= 8 && (
+            <span className="absolute left-0 top-1 z-10 rounded-r px-1 py-0.5 text-[9px] font-bold leading-none bg-yellow-400 text-zinc-900">
+              Top Rated
+            </span>
+          )}
+          {movie.poster_path ? (
+            <>
+              {!imageLoaded && <div className="absolute inset-0 animate-shimmer" />}
+              <img
+                src={getPosterUrl(movie.poster_path)}
+                alt={movie.title}
+                className={`h-full w-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                loading="lazy"
+                onLoad={() => setImageLoaded(true)}
+              />
+            </>
+          ) : (
+            <NoPoster />
+          )}
+        </div>
+        <div className="min-w-0">
+          <h3 className="truncate font-semibold text-white">{movie.title}</h3>
+          <div className="mt-1 flex items-center gap-1">
+            <span className="text-yellow-400">★</span>
+            <span className="text-sm text-zinc-400">{movie.vote_average.toFixed(1)}</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
-      className={`group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl ${getRatingClasses(movie.vote_average)}`}
+      className={`group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl ${glowClass}`}
     >
       <div className="relative aspect-[2/3] w-full">
         {movie.vote_average >= 8 && (
