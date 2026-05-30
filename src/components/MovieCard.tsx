@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import type { Movie } from '../types/tmdb'
 import getPosterUrl from '../api/getPosterUrl'
+import getRatingClasses from '../utils/getRatingClasses'
 import NoPoster from './NoPoster'
 
 interface Props {
@@ -11,8 +12,15 @@ const MovieCard = ({ movie }: Props) => {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   return (
-    <div className="group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl">
+    <div
+      className={`group cursor-pointer overflow-hidden rounded-xl bg-zinc-800 transition duration-300 hover:scale-105 hover:shadow-xl ${getRatingClasses(movie.vote_average)}`}
+    >
       <div className="relative aspect-[2/3] w-full">
+        {movie.vote_average >= 8 && (
+          <span className="absolute left-0 top-3 z-10 rounded-r-md bg-yellow-400 px-2 py-0.5 text-xs font-bold text-zinc-900">
+            Top Rated
+          </span>
+        )}
         {movie.poster_path ? (
           <>
             {!imageLoaded && <div className="absolute inset-0 animate-shimmer" />}
