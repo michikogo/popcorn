@@ -173,26 +173,36 @@ src/
 
 ## Development Phases
 
-- **MR 1 — Project Setup**
-  - Vite + React + TypeScript scaffold
-  - Tailwind CSS config (`tailwind.config.ts`, `postcss.config.js`)
-  - `.env` with `VITE_TMDB_API_KEY`, added to `.gitignore`
-  - Local fallback poster asset (`src/assets/no-poster.png`)
-  - Clean boilerplate
+- **[PR #1](https://github.com/michikogo/popcorn/pull/1) — Docs** ✅
+  - Product brief, tech brief, decision log
 
-- **MR 2 — Data Layer**
+- **[PR #3](https://github.com/michikogo/popcorn/pull/3) — Project Setup** ✅
+  - Vite + React + TypeScript scaffold
+  - Blank white page, boilerplate removed
+
+- **[PR #5](https://github.com/michikogo/popcorn/pull/5) — Linting + CI** ✅
+  - Prettier + ESLint integration
+  - GitHub Actions CI pipeline
+  - PR template
+
+- **[PR #6](https://github.com/michikogo/popcorn/pull/6) — Tailwind Setup**
+  - Install Tailwind CSS v4 + Vite plugin
+  - Add `@import 'tailwindcss'` to `index.css`
+  - Placeholder `MovieCard` to verify Tailwind works
+
+- **MR — Data Layer**
   - `Movie`, `Genre`, `DiscoverResponse` types (`src/types/tmdb.ts`)
   - API fetch helpers for `/discover/movie` and `/genre/movie/list` (`src/api/tmdb.ts`)
   - `getPosterUrl()` helper with fallback to local asset
   - `useGenres` hook — fetches once on mount
   - `useMovies` hook — re-fetches on filter/sort change, returns movies, loading, error
 
-- **MR 3 — UI Components**
+- **MR — UI Components**
   - `SkeletonCard` — pulsing placeholder card
   - `MovieCard` — poster, title, rating badge, hover effect (`hover:scale-105 hover:shadow-xl`), lazy image loading
   - `MovieGrid` — renders `MovieCard` grid, skeleton state, empty state, error state
 
-- **MR 4 — FilterBar + App Wiring**
+- **MR — FilterBar + App Wiring**
   - `FilterBar` — genre dropdown, year dropdown (2020–2025), sort dropdown
   - `App` — holds filter/sort state, wires `useMovies` and `useGenres` to `FilterBar` and `MovieGrid`
   - Default sort: `popularity.desc`
