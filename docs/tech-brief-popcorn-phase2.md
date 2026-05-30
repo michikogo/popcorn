@@ -48,20 +48,20 @@ App
 
 Two tiers based on `vote_average`:
 
-| Rating | Treatment                                                                  |
-| ------ | -------------------------------------------------------------------------- |
-| ≥ 8    | Gold glow (`shadow-yellow-400/50`) + "Top Rated" ribbon in top-left corner |
-| ≥ 7    | Gold glow only                                                             |
-| < 7    | No treatment                                                               |
+| Rating | Treatment                                                           |
+| ------ | ------------------------------------------------------------------- |
+| ≥ 8    | Gold glow + `ring-2` border + "Top Rated" ribbon in top-left corner |
+| ≥ 7    | Gold glow + `ring-1` border                                         |
+| < 7    | No treatment                                                        |
 
-Glow via Tailwind `ring` + `shadow`. Ribbon is an absolutely-positioned `<span>` inside the poster area — no layout impact.
+Glow via Tailwind `shadow`. Ring border uses `ring-2` for ≥8 and `ring-1` for ≥7 — border weight is the structural signal so the tier is readable in grayscale and for color blind users (not color alone). Ribbon is an absolutely-positioned `<span>` inside the poster area — no layout impact.
 
 ### List View
 
 `layout: 'grid' | 'list'` state in `App`, defaulting to `'grid'`.
 
 - Toggle button (⊞ / ☰) added to `FilterBar`, right-aligned with `ml-auto`
-- `MovieGrid` renamed to `MovieGallery`; switches between `grid` and `flex flex-col gap-3` container based on `layout` prop
+- `MovieGrid` renamed to `MovieGallery`; switches between `grid` and `flex flex-col gap-5` container based on `layout` prop
 - List mode extracted into a dedicated `MovieListItem` component (poster fixed at `w-14 h-20`, title + rating to the right, full row width); `MovieCard` remains grid-only
 
 ### Year Range Filter
@@ -72,6 +72,7 @@ Replaces the single year `<select>` in `FilterBar` with two dropdowns: **From** 
 - `useMovies` params updated: `year` → `yearFrom`, `yearTo`
 - `fetchMovies` passes `primary_release_date.gte` = `${yearFrom}-01-01` and `primary_release_date.lte` = `${yearTo}-12-31`
 - Both dropdowns show 2020–2025; `yearTo` must be ≥ `yearFrom` (enforce in `FilterBar`)
+- Release year displayed on `MovieCard` and `MovieListItem` next to rating, separated by a `·` dot — same color for both to avoid relying on shade difference alone
 
 ### Infinite Scroll
 
@@ -149,6 +150,14 @@ New/changed params:
 - **Tradeoff:** `FilterBar` props change is a breaking change to the existing interface — needs coordinated update across `FilterBar`, `useMovies`, and `fetchMovies`
 - **Reversible?** Yes
 
+### Rating ring weight as structural accessibility cue
+
+- **Chosen:** `ring-2` for ≥8, `ring-1` for ≥7 — border thickness differentiates tiers
+- **Alternatives:** color-only glow (`ring-1 ring-yellow-400`) for both tiers — rejected because it's invisible in grayscale and to color blind users
+- **Rationale:** border weight is a structural signal that works without color; the yellow glow remains additive for everyone else
+- **Tradeoff:** very subtle at small card sizes; the "Top Rated" ribbon handles the ≥8 case with text, so the ring matters most for ≥7
+- **Reversible?** Yes
+
 ---
 
 ## Development Phases
@@ -165,9 +174,13 @@ New/changed params:
   - Extract list layout into new `MovieListItem` component; keep `MovieCard` grid-only
   - Document unicode-over-Heroicons decision in `docs/decisions.md`
 
-- **MR 3 — Year Range Filter**
+- **[PR #15](https://github.com/michikogo/popcorn/pull/15) — Year Range Filter** ✅
   - Replace `year` with `yearFrom` / `yearTo` in `FilterBar` props, `useMovies`, and `fetchMovies`
+  - Switch TMDB param from `primary_release_year` to `primary_release_date.gte`/`lte`
   - Add validation: disable `yearTo` options below `yearFrom`
+  - Show release year on `MovieCard` and `MovieListItem` with `·` dot separator
+  - Bump rating ring to `ring-2` for ≥8 / `ring-1` for ≥7 (border weight as accessibility signal)
+  - Increase grid gap to `gap-6` (room for `hover:scale-105`) and list gap to `gap-5`
 
 - **MR 4 — Infinite Scroll**
   - Add `page` and `totalPages` state to `useMovies`
