@@ -27,17 +27,17 @@ Data flow:
   useMovies → GET /discover/movie?params   → populates MovieGrid (re-fetches on filter/sort change)
 ```
 
-| Component       | Type            | Role                                                         |
-| --------------- | --------------- | ------------------------------------------------------------ |
-| `App`           | React component | Root — holds filter/sort state, passes to hooks and children |
-| `FilterBar`     | React component | Genre dropdown, year dropdown, sort dropdown                 |
-| `MovieGrid`     | React component | Renders grid of `MovieCard` or `SkeletonCard`                |
-| `MovieCard`     | React component | Poster, title, rating — reusable, no internal state          |
-| `SkeletonCard`  | React component | Placeholder shown while `useMovies` is loading               |
-| `useMovies`     | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
-| `useGenres`     | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
-| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module | Fetch wrappers, URL builder, reads env key |
-| `types/tmdb.ts` | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
+| Component                                                 | Type            | Role                                                         |
+| --------------------------------------------------------- | --------------- | ------------------------------------------------------------ |
+| `App`                                                     | React component | Root — holds filter/sort state, passes to hooks and children |
+| `FilterBar`                                               | React component | Genre dropdown, year dropdown, sort dropdown                 |
+| `MovieGrid`                                               | React component | Renders grid of `MovieCard` or `SkeletonCard`                |
+| `MovieCard`                                               | React component | Poster, title, rating — reusable, no internal state          |
+| `SkeletonCard`                                            | React component | Placeholder shown while `useMovies` is loading               |
+| `useMovies`                                               | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
+| `useGenres`                                               | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
+| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module      | Fetch wrappers, URL builder, reads env key                   |
+| `types/tmdb.ts`                                           | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
 
 ## Data Model
 
