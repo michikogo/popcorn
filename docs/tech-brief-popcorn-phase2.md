@@ -10,7 +10,7 @@
 
 ## Overview
 
-Phase 2 extends the Phase 1 movie discovery grid with five features: rating-based card visuals, filter transition animations, list view, year range filter, and infinite scroll. All changes are additive — no Phase 1 behaviour is removed. This doc covers only the features not already shipped in Phase 1.
+Phase 2 extends the Phase 1 movie discovery grid with four features: rating-based card visuals, list view, year range filter, and infinite scroll. All changes are additive — no Phase 1 behaviour is removed. This doc covers only the features not already shipped in Phase 1.
 
 Already shipped in Phase 1 that counted as Phase 2 scope:
 
@@ -21,23 +21,22 @@ Already shipped in Phase 1 that counted as Phase 2 scope:
 
 ## System Architecture
 
-No new components or hooks introduced until MR 5 (infinite scroll). Existing components are extended in place.
+No new components or hooks introduced until MR 4 (infinite scroll). Existing components are extended in place.
 
 ```
 App
   ├── FilterBar  (+ list/grid toggle, + year range from/to)
-  └── MovieGrid  (+ fade transition, + list layout mode)
+  └── MovieGrid  (+ list layout mode)
         ├── MovieCard (+ glow border, + Top Rated ribbon)
         └── SkeletonCard
 ```
 
-| Change                         | Affects                                      | Notes                                                      |
-| ------------------------------ | -------------------------------------------- | ---------------------------------------------------------- |
-| Rating visuals (glow + ribbon) | `MovieCard`                                  | Pure Tailwind, no new state                                |
-| Fade on filter change          | `App`, `MovieGrid`                           | `isChanging` state in App, opacity transition in MovieGrid |
-| List view toggle               | `App`, `FilterBar`, `MovieCard`, `MovieGrid` | `layout` state in App                                      |
-| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`      | Replaces single year param with `gte`/`lte`                |
-| Infinite scroll                | `useMovies`, `MovieGrid`                     | IntersectionObserver sentinel, page state in hook          |
+| Change                         | Affects                                      | Notes                                             |
+| ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
+| Rating visuals (glow + ribbon) | `MovieCard`                                  | Pure Tailwind, no new state                       |
+| List view toggle               | `App`, `FilterBar`, `MovieCard`, `MovieGrid` | `layout` state in App                             |
+| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`      | Replaces single year param with `gte`/`lte`       |
+| Infinite scroll                | `useMovies`, `MovieGrid`                     | IntersectionObserver sentinel, page state in hook |
 
 ---
 
@@ -54,15 +53,6 @@ Two tiers based on `vote_average`:
 | < 7    | No treatment                                                               |
 
 Glow via Tailwind `ring` + `shadow`. Ribbon is an absolutely-positioned `<span>` inside the poster area — no layout impact.
-
-### Filter Transition
-
-When any filter or sort value changes, the grid fades out briefly then fades back in when new results arrive.
-
-- `isChanging` boolean state in `App`, set to `true` on any filter/sort change
-- Reset to `false` inside a `useEffect` that watches `loading` — when `loading` goes `false`, clear `isChanging`
-- `MovieGrid` receives `isChanging` prop and applies `transition-opacity duration-300 opacity-0` while true, `opacity-100` when false
-- No changes to `useMovies` — avoids the `react-hooks/set-state-in-effect` lint rule
 
 ### List View
 
@@ -141,14 +131,6 @@ New/changed params:
 - **Tradeoff:** subtler signal than size difference; depends on user noticing the glow
 - **Reversible?** Yes
 
-### Filter transition: `isChanging` in App over hook changes
-
-- **Chosen:** `isChanging` boolean in `App`, passed to `MovieGrid` as a prop
-- **Alternatives:** `Promise.resolve().then()` in `useMovies` to reset `loading` to `true` — rejected to avoid triggering `react-hooks/set-state-in-effect`
-- **Rationale:** keeps `useMovies` clean, no lint workarounds, transition handled purely at the UI layer
-- **Tradeoff:** `isChanging` is a second loading-like flag — two sources of truth for "is something happening"
-- **Reversible?** Yes
-
 ### Infinite scroll: IntersectionObserver over scroll event listener
 
 - **Chosen:** `IntersectionObserver` on a sentinel `<div>`
@@ -169,25 +151,22 @@ New/changed params:
 
 ## Development Phases
 
-- **MR 1 — Rating Visuals**
+- **[PR #12](https://github.com/michikogo/popcorn/pull/12) — Rating Visuals** ✅
   - Add glow (`ring`, `shadow-yellow-400/50`) to `MovieCard` for `vote_average ≥ 7`
   - Add "Top Rated" ribbon overlay to `MovieCard` for `vote_average ≥ 8`
+  - `getRatingClasses` utility extracted to `src/utils/getRatingClasses.ts`
 
-- **MR 2 — Filter Fade Transition**
-  - Add `isChanging` state to `App`, set on filter/sort change, cleared when `loading` goes false
-  - Pass `isChanging` to `MovieGrid`, apply `transition-opacity` based on value
-
-- **MR 3 — List View**
+- **MR 2 — List View**
   - Add `layout: 'grid' | 'list'` state to `App`
   - Add toggle button to `FilterBar`
   - Update `MovieGrid` to switch between grid and flex-col layout
   - Update `MovieCard` to render list mode (poster left, info right)
 
-- **MR 4 — Year Range Filter**
+- **MR 3 — Year Range Filter**
   - Replace `year` with `yearFrom` / `yearTo` in `FilterBar` props, `useMovies`, and `fetchMovies`
   - Add validation: disable `yearTo` options below `yearFrom`
 
-- **MR 5 — Infinite Scroll**
+- **MR 4 — Infinite Scroll**
   - Add `page` and `totalPages` state to `useMovies`
   - Append results on page increment, reset on filter/sort change
   - Add `IntersectionObserver` sentinel to `MovieGrid` with `rootMargin: '500px'`
@@ -198,4 +177,4 @@ New/changed params:
 
 | Question                                                                                 | Owner   | Due               |
 | ---------------------------------------------------------------------------------------- | ------- | ----------------- |
-| Virtualization threshold — at what card count do we introduce `@tanstack/react-virtual`? | Michiko | Before MR 5 ships |
+| Virtualization threshold — at what card count do we introduce `@tanstack/react-virtual`? | Michiko | Before MR 4 ships |
