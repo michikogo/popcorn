@@ -6,13 +6,15 @@ const BASE_URL = 'https://api.themoviedb.org/3'
 export interface FetchMoviesParams {
   sortBy?: string
   genreId?: number | null
-  year?: number | null
+  yearFrom?: number | null
+  yearTo?: number | null
 }
 
 const fetchMovies = async ({
   sortBy = 'popularity.desc',
   genreId = null,
-  year = null,
+  yearFrom = null,
+  yearTo = null,
 }: FetchMoviesParams = {}): Promise<DiscoverResponse> => {
   const params = new URLSearchParams({
     api_key: API_KEY,
@@ -21,7 +23,8 @@ const fetchMovies = async ({
   })
 
   if (genreId) params.append('with_genres', String(genreId))
-  if (year) params.append('primary_release_year', String(year))
+  if (yearFrom) params.append('primary_release_date.gte', `${yearFrom}-01-01`)
+  if (yearTo) params.append('primary_release_date.lte', `${yearTo}-12-31`)
 
   const res = await fetch(`${BASE_URL}/discover/movie?${params}`)
   if (!res.ok) throw new Error(`Failed to fetch movies: ${res.status}`)

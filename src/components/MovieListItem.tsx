@@ -41,6 +41,8 @@ const MovieListItem = ({ movie }: Props) => {
         <div className="mt-1 flex items-center gap-1">
           <span className="text-yellow-400">★</span>
           <span className="text-sm text-zinc-400">{movie.vote_average.toFixed(1)}</span>
+          <span className="text-sm text-zinc-400">·</span>
+          <span className="text-sm text-zinc-400">{movie.release_date?.slice(0, 4)}</span>
         </div>
       </div>
     </div>

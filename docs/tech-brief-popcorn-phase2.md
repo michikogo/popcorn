@@ -14,7 +14,7 @@ Phase 2 extends the Phase 1 movie discovery grid with four features: rating-base
 
 Already shipped in Phase 1 that counted as Phase 2 scope:
 
-- **Responsive grid** — `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` in `MovieGrid`
+- **Responsive grid** — `grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5` in `MovieGallery`
 - **Skeleton shimmer** — `@keyframes shimmer` + per-image fade-in in `MovieCard`
 - **CSS transitions on filter/sort changes** — covered by the per-image shimmer; each new card fades in individually as its poster loads, making a separate grid-level fade transition redundant
 
@@ -26,18 +26,19 @@ No new components or hooks introduced until MR 4 (infinite scroll). Existing com
 
 ```
 App
-  ├── FilterBar  (+ list/grid toggle, + year range from/to)
-  └── MovieGrid  (+ list layout mode)
-        ├── MovieCard (+ glow border, + Top Rated ribbon)
+  ├── FilterBar     (+ list/grid toggle, + year range from/to)
+  └── MovieGallery  (renamed from MovieGrid; + list layout mode)
+        ├── MovieCard     (grid only)
+        ├── MovieListItem (list only — new component)
         └── SkeletonCard
 ```
 
-| Change                         | Affects                                      | Notes                                             |
-| ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
-| Rating visuals (glow + ribbon) | `MovieCard`                                  | Pure Tailwind, no new state                       |
-| List view toggle               | `App`, `FilterBar`, `MovieCard`, `MovieGrid` | `layout` state in App                             |
-| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`      | Replaces single year param with `gte`/`lte`       |
-| Infinite scroll                | `useMovies`, `MovieGrid`                     | IntersectionObserver sentinel, page state in hook |
+| Change                         | Affects                                             | Notes                                                           |
+| ------------------------------ | --------------------------------------------------- | --------------------------------------------------------------- |
+| Rating visuals (glow + ribbon) | `MovieCard`                                         | Pure Tailwind, no new state                                     |
+| List view toggle               | `App`, `FilterBar`, `MovieGallery`, `MovieListItem` | `layout` state in App; list mode extracted to its own component |
+| Year range filter              | `FilterBar`, `useMovies`, `fetchMovies`             | Replaces single year param with `gte`/`lte`                     |
+| Infinite scroll                | `useMovies`, `MovieGallery`                         | IntersectionObserver sentinel, page state in hook               |
 
 ---
 
@@ -47,21 +48,21 @@ App
 
 Two tiers based on `vote_average`:
 
-| Rating | Treatment                                                                  |
-| ------ | -------------------------------------------------------------------------- |
-| ≥ 8    | Gold glow (`shadow-yellow-400/50`) + "Top Rated" ribbon in top-left corner |
-| ≥ 7    | Gold glow only                                                             |
-| < 7    | No treatment                                                               |
+| Rating | Treatment                                                           |
+| ------ | ------------------------------------------------------------------- |
+| ≥ 8    | Gold glow + `ring-2` border + "Top Rated" ribbon in top-left corner |
+| ≥ 7    | Gold glow + `ring-1` border                                         |
+| < 7    | No treatment                                                        |
 
-Glow via Tailwind `ring` + `shadow`. Ribbon is an absolutely-positioned `<span>` inside the poster area — no layout impact.
+Glow via Tailwind `shadow`. Ring border uses `ring-2` for ≥8 and `ring-1` for ≥7 — border weight is the structural signal so the tier is readable in grayscale and for color blind users (not color alone). Ribbon is an absolutely-positioned `<span>` inside the poster area — no layout impact.
 
 ### List View
 
 `layout: 'grid' | 'list'` state in `App`, defaulting to `'grid'`.
 
-- Toggle button added to `FilterBar`
-- `MovieGrid` switches between `grid` and `flex flex-col` layout based on prop
-- `MovieCard` renders differently in list mode: poster fixed at `w-24`, title + rating displayed to the right, full row width
+- Toggle button (⊞ / ☰) added to `FilterBar`, right-aligned with `ml-auto`
+- `MovieGrid` renamed to `MovieGallery`; switches between `grid` and `flex flex-col gap-5` container based on `layout` prop
+- List mode extracted into a dedicated `MovieListItem` component (poster fixed at `w-14 h-20`, title + rating to the right, full row width); `MovieCard` remains grid-only
 
 ### Year Range Filter
 
@@ -71,6 +72,7 @@ Replaces the single year `<select>` in `FilterBar` with two dropdowns: **From** 
 - `useMovies` params updated: `year` → `yearFrom`, `yearTo`
 - `fetchMovies` passes `primary_release_date.gte` = `${yearFrom}-01-01` and `primary_release_date.lte` = `${yearTo}-12-31`
 - Both dropdowns show 2020–2025; `yearTo` must be ≥ `yearFrom` (enforce in `FilterBar`)
+- Release year displayed on `MovieCard` and `MovieListItem` next to rating, separated by a `·` dot — same color for both to avoid relying on shade difference alone
 
 ### Infinite Scroll
 
@@ -78,7 +80,7 @@ Page-based fetch appended to existing results.
 
 - `page` state added to `useMovies`, starting at `1`
 - `totalPages` exposed from hook (from `DiscoverResponse.total_pages`)
-- `IntersectionObserver` on a sentinel `<div>` at the bottom of `MovieGrid`
+- `IntersectionObserver` on a sentinel `<div>` at the bottom of `MovieGallery`
 - Sentinel fires when ~5 rows from viewport bottom (`rootMargin: '500px'`)
 - On trigger: increment `page` in `useMovies` — new fetch runs, results appended (`setMovies(prev => [...prev, ...data.results])`)
 - Filter/sort change resets `page` to `1` and clears `movies` to `[]`
@@ -148,6 +150,14 @@ New/changed params:
 - **Tradeoff:** `FilterBar` props change is a breaking change to the existing interface — needs coordinated update across `FilterBar`, `useMovies`, and `fetchMovies`
 - **Reversible?** Yes
 
+### Rating ring weight as structural accessibility cue
+
+- **Chosen:** `ring-2` for ≥8, `ring-1` for ≥7 — border thickness differentiates tiers
+- **Alternatives:** color-only glow (`ring-1 ring-yellow-400`) for both tiers — rejected because it's invisible in grayscale and to color blind users
+- **Rationale:** border weight is a structural signal that works without color; the yellow glow remains additive for everyone else
+- **Tradeoff:** very subtle at small card sizes; the "Top Rated" ribbon handles the ≥8 case with text, so the ring matters most for ≥7
+- **Reversible?** Yes
+
 ---
 
 ## Development Phases
@@ -157,20 +167,25 @@ New/changed params:
   - Add "Top Rated" ribbon overlay to `MovieCard` for `vote_average ≥ 8`
   - `getRatingClasses` utility extracted to `src/utils/getRatingClasses.ts`
 
-- **MR 2 — List View**
+- **[PR #14](https://github.com/michikogo/popcorn/pull/14) — List View** ✅
   - Add `layout: 'grid' | 'list'` state to `App`
-  - Add toggle button to `FilterBar`
-  - Update `MovieGrid` to switch between grid and flex-col layout
-  - Update `MovieCard` to render list mode (poster left, info right)
+  - Add ⊞ / ☰ toggle button to `FilterBar` (`ml-auto`, segmented style)
+  - Rename `MovieGrid` → `MovieGallery`; switch container between grid and `flex flex-col gap-3` based on `layout`
+  - Extract list layout into new `MovieListItem` component; keep `MovieCard` grid-only
+  - Document unicode-over-Heroicons decision in `docs/decisions.md`
 
-- **MR 3 — Year Range Filter**
+- **[PR #15](https://github.com/michikogo/popcorn/pull/15) — Year Range Filter** ✅
   - Replace `year` with `yearFrom` / `yearTo` in `FilterBar` props, `useMovies`, and `fetchMovies`
+  - Switch TMDB param from `primary_release_year` to `primary_release_date.gte`/`lte`
   - Add validation: disable `yearTo` options below `yearFrom`
+  - Show release year on `MovieCard` and `MovieListItem` with `·` dot separator
+  - Bump rating ring to `ring-2` for ≥8 / `ring-1` for ≥7 (border weight as accessibility signal)
+  - Increase grid gap to `gap-6` (room for `hover:scale-105`) and list gap to `gap-5`
 
 - **MR 4 — Infinite Scroll**
   - Add `page` and `totalPages` state to `useMovies`
   - Append results on page increment, reset on filter/sort change
-  - Add `IntersectionObserver` sentinel to `MovieGrid` with `rootMargin: '500px'`
+  - Add `IntersectionObserver` sentinel to `MovieGallery` with `rootMargin: '500px'`
   - Add AbortController to `useMovies` to cancel stale fetches
   - Show spinner below grid during next-page fetch
 
