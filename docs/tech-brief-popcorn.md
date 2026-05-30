@@ -36,7 +36,7 @@ Data flow:
 | `SkeletonCard`  | React component | Placeholder shown while `useMovies` is loading               |
 | `useMovies`     | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change     |
 | `useGenres`     | Custom hook     | Fetches `/genre/movie/list` once on mount                    |
-| `api/tmdb.ts`   | API module      | Fetch wrapper, builds URLs, reads env key                    |
+| `api/fetchMovies.ts`, `fetchGenres.ts`, `getPosterUrl.ts` | API module | Fetch wrappers, URL builder, reads env key |
 | `types/tmdb.ts` | Types file      | `Movie`, `Genre`, `DiscoverResponse` interfaces              |
 
 ## Data Model
@@ -156,11 +156,14 @@ Image base URL: https://image.tmdb.org/t/p/w500{poster_path}
 ```
 src/
   api/
-    tmdb.ts            // fetch helpers, URL builders
+    fetchMovies.ts     // GET /discover/movie
+    fetchGenres.ts     // GET /genre/movie/list
+    getPosterUrl.ts    // builds TMDB image URL
   components/
     FilterBar.tsx
     MovieCard.tsx
     MovieGrid.tsx
+    NoPoster.tsx       // inline SVG fallback for missing posters
     SkeletonCard.tsx
   hooks/
     useGenres.ts
@@ -190,10 +193,11 @@ src/
   - Add `@import 'tailwindcss'` to `index.css`
   - Placeholder `MovieCard` to verify Tailwind works
 
-- **MR — Data Layer**
+- **[PR #7](https://github.com/michikogo/popcorn/pull/7) — Data Layer** ✅
   - `Movie`, `Genre`, `DiscoverResponse` types (`src/types/tmdb.ts`)
-  - API fetch helpers for `/discover/movie` and `/genre/movie/list` (`src/api/tmdb.ts`)
-  - `getPosterUrl()` helper with fallback to local asset
+  - API fetch helpers for `/discover/movie` and `/genre/movie/list` (`src/api/fetchMovies.ts`, `src/api/fetchGenres.ts`)
+  - `getPosterUrl()` helper (`src/api/getPosterUrl.ts`)
+  - `NoPoster` component — inline SVG fallback rendered when `poster_path` is null
   - `useGenres` hook — fetches once on mount
   - `useMovies` hook — re-fetches on filter/sort change, returns movies, loading, error
 
