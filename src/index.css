@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+:root {
+  background-color: var(--color-zinc-950);
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
