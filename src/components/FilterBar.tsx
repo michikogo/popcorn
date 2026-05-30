@@ -14,9 +14,11 @@ interface Props {
   sortBy: string
   genreId: number | null
   year: number | null
+  layout: 'grid' | 'list'
   onSortChange: (value: string) => void
   onGenreChange: (value: number | null) => void
   onYearChange: (value: number | null) => void
+  onLayoutChange: (value: 'grid' | 'list') => void
 }
 
 const FilterBar = ({
@@ -24,12 +26,14 @@ const FilterBar = ({
   sortBy,
   genreId,
   year,
+  layout,
   onSortChange,
   onGenreChange,
   onYearChange,
+  onLayoutChange,
 }: Props) => {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       <select
         value={sortBy}
         onChange={(e) => onSortChange(e.target.value)}
@@ -67,6 +71,23 @@ const FilterBar = ({
           </option>
         ))}
       </select>
+
+      <div className="ml-auto flex rounded-lg bg-zinc-800 p-1">
+        <button
+          onClick={() => onLayoutChange('grid')}
+          className={`rounded-md px-3 py-1.5 text-sm transition-colors ${layout === 'grid' ? 'bg-zinc-600 text-white' : 'text-zinc-400 hover:text-white'}`}
+          aria-label="Grid view"
+        >
+          ⊞
+        </button>
+        <button
+          onClick={() => onLayoutChange('list')}
+          className={`rounded-md px-3 py-1.5 text-sm transition-colors ${layout === 'list' ? 'bg-zinc-600 text-white' : 'text-zinc-400 hover:text-white'}`}
+          aria-label="List view"
+        >
+          ☰
+        </button>
+      </div>
     </div>
   )
 }
