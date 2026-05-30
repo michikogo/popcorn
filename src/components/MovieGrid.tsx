@@ -9,7 +9,7 @@ interface Props {
   error: string | null
 }
 
-const SKELETON_COUNT = 20
+const SKELETON_COUNT = 10
 
 const MovieGrid = ({ movies, loading, error }: Props) => {
   if (error) {
