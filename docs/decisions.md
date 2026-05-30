@@ -54,6 +54,18 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
+## Layout toggle icons: unicode over an icon library
+
+**Decision:** Use unicode characters (⊞ for grid, ☰ for list) in the `FilterBar` layout toggle instead of an icon library.
+
+**Context:** Heroicons (made by the Tailwind team) provides `Squares2X2Icon` and `ListBulletIcon` which would be a natural fit and are visually polished. Install is `npm install @heroicons/react`.
+
+**Reasoning:** For two small toggle buttons, adding a dependency is unnecessary. The unicode characters are universally supported, visually clear, and require zero setup. Heroicons remains the right choice if more icons are needed elsewhere in the app.
+
+**Tradeoff:** Slightly less refined visually than SVG icons. Easy to swap if the bar for icon quality is raised.
+
+---
+
 ## Phase 2 scope decisions
 
 The following were deliberately deferred to Phase 2 to keep Phase 1 focused on the core assignment requirements:
