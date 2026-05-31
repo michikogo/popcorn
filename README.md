@@ -25,10 +25,12 @@ Browser
 
 ## Docs
 
-- [Design decisions — Phase 1](docs/tech-brief-popcorn-phase1.md)
-- [Design decisions — Phase 2](docs/tech-brief-popcorn-phase2.md)
-- [Test strategy](docs/tech-brief-popcorn-tests.md)
-- [Movie detail modal](docs/tech-brief-popcorn-modal.md)
+- [Technical brief — Phase 1](docs/tech-brief-popcorn.md)
+- [Technical brief — Phase 2](docs/tech-brief-popcorn-phase2.md)
+- [Technical brief — Movie detail modal](docs/tech-brief-popcorn-modal.md)
+- [Technical brief — Test suite](docs/tech-brief-popcorn-tests.md)
+- [Decision log](docs/decisions.md)
+- [Engineering notes](docs/engineering-notes.md)
 - [Known bugs](docs/bugs.md)
 
 ## Known limitations
@@ -37,4 +39,4 @@ Browser
 
 **Infinite scroll threshold is aggressive:** The `IntersectionObserver` uses a `500px` rootMargin, so the next page starts loading before the user reaches the bottom. Works well on fast connections; on slow connections the user may notice a spinner sooner than expected.
 
-**No WebSocket reconnection:** Not applicable — this app has no persistent connection. Each fetch is independent with an `AbortController` for cleanup on filter change.
+**No caching between sessions:** Filters and scroll position reset on page reload. A production version could persist state to `localStorage` or the URL query string.
