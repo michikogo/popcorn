@@ -13,6 +13,13 @@ const MovieModal = ({ movie, onClose }: Props) => {
   const { movie: detail, loading, error } = useMovie(movie.id)
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
