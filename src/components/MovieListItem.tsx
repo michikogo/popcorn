@@ -6,14 +6,16 @@ import NoPoster from './NoPoster'
 
 interface Props {
   movie: Movie
+  onClick: () => void
 }
 
-const MovieListItem = ({ movie }: Props) => {
+const MovieListItem = ({ movie, onClick }: Props) => {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   return (
     <div
       className={`flex cursor-pointer items-center gap-4 rounded-xl bg-zinc-800 p-3 transition duration-300 hover:bg-zinc-700 ${getRatingClasses(movie.vote_average)}`}
+      onClick={onClick}
     >
       <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg">
         {movie.vote_average >= 8 && (

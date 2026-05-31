@@ -3,6 +3,8 @@ import useMovies from './hooks/useMovies'
 import useGenres from './hooks/useGenres'
 import FilterBar from './components/FilterBar'
 import MovieGallery from './components/MovieGallery'
+import MovieModal from './components/MovieModal'
+import type { Movie } from './types/tmdb'
 
 const App = () => {
   const [sortBy, setSortBy] = useState('popularity.desc')
@@ -10,6 +12,7 @@ const App = () => {
   const [yearFrom, setYearFrom] = useState<number | null>(null)
   const [yearTo, setYearTo] = useState<number | null>(null)
   const [layout, setLayout] = useState<'grid' | 'list'>('grid')
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
   const { genres } = useGenres()
   const { movies, loading, loadingMore, error, page, totalPages, loadMore } = useMovies({
@@ -47,8 +50,13 @@ const App = () => {
           page={page}
           totalPages={totalPages}
           onLoadMore={loadMore}
+          onMovieClick={setSelectedMovie}
         />
       </div>
+
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} genres={genres} onClose={() => setSelectedMovie(null)} />
+      )}
     </div>
   )
 }

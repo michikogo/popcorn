@@ -13,6 +13,7 @@ interface Props {
   page: number
   totalPages: number
   onLoadMore: () => void
+  onMovieClick: (movie: Movie) => void
 }
 
 const SKELETON_COUNT = 10
@@ -26,6 +27,7 @@ const MovieGallery = ({
   page,
   totalPages,
   onLoadMore,
+  onMovieClick,
 }: Props) => {
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -71,8 +73,12 @@ const MovieGallery = ({
         {loading
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SkeletonCard key={i} />)
           : layout === 'list'
-            ? movies.map((movie) => <MovieListItem key={movie.id} movie={movie} />)
-            : movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)}
+            ? movies.map((movie) => (
+                <MovieListItem key={movie.id} movie={movie} onClick={() => onMovieClick(movie)} />
+              ))
+            : movies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} onClick={() => onMovieClick(movie)} />
+              ))}
       </div>
 
       {!loading && page < totalPages && <div ref={sentinelRef} />}
