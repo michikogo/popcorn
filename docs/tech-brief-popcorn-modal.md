@@ -24,13 +24,13 @@ MovieCard / MovieListItem
               └── onClose → setSelectedMovie(null)
 ```
 
-| Component | Type | Role |
-|-----------|------|------|
-| `App` | Container | Owns `selectedMovie` state; passes `onMovieClick` down and renders modal |
-| `MovieGallery` | Passthrough | Accepts `onMovieClick`, forwards it to each card/list item |
-| `MovieCard` | UI | Grid tile; fires `onClick` prop on click |
-| `MovieListItem` | UI | List row; fires `onClick` prop on click |
-| `MovieModal` | UI | Overlay with poster, title, rating, year, genre chips |
+| Component       | Type        | Role                                                                     |
+| --------------- | ----------- | ------------------------------------------------------------------------ |
+| `App`           | Container   | Owns `selectedMovie` state; passes `onMovieClick` down and renders modal |
+| `MovieGallery`  | Passthrough | Accepts `onMovieClick`, forwards it to each card/list item               |
+| `MovieCard`     | UI          | Grid tile; fires `onClick` prop on click                                 |
+| `MovieListItem` | UI          | List row; fires `onClick` prop on click                                  |
+| `MovieModal`    | UI          | Overlay with poster, title, rating, year, genre chips                    |
 
 ---
 
@@ -94,13 +94,13 @@ Genre names are resolved client-side: `genres.filter(g => movie.genre_ids.includ
 
 ## Edge Cases & Error Handling
 
-| Scenario | Expected Behavior |
-|----------|-------------------|
-| `poster_path` is null | `NoPoster` component renders in place of `<img>` |
-| `genre_ids` don't match any loaded genre | Genre chip section is omitted (empty array → no render) |
-| `release_date` is empty string | Year display is skipped (`?.slice(0, 4)` returns undefined → not rendered) |
-| User clicks inside modal, not backdrop | `e.stopPropagation()` on modal card prevents close |
-| Filter changes while modal is open | Modal stays open — `selectedMovie` is not tied to filter state |
+| Scenario                                 | Expected Behavior                                                          |
+| ---------------------------------------- | -------------------------------------------------------------------------- |
+| `poster_path` is null                    | `NoPoster` component renders in place of `<img>`                           |
+| `genre_ids` don't match any loaded genre | Genre chip section is omitted (empty array → no render)                    |
+| `release_date` is empty string           | Year display is skipped (`?.slice(0, 4)` returns undefined → not rendered) |
+| User clicks inside modal, not backdrop   | `e.stopPropagation()` on modal card prevents close                         |
+| Filter changes while modal is open       | Modal stays open — `selectedMovie` is not tied to filter state             |
 
 ---
 
@@ -117,6 +117,6 @@ This feature shipped in a single MR:
 
 ## Open Questions
 
-| Question | Owner | Due |
-|----------|-------|-----|
+| Question                                              | Owner   | Due                    |
+| ----------------------------------------------------- | ------- | ---------------------- |
 | Add movie overview + runtime via `/movie/{id}` fetch? | Michiko | If taken to production |

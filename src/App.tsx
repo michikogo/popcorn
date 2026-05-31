@@ -54,9 +54,7 @@ const App = () => {
         />
       </div>
 
-      {selectedMovie && (
-        <MovieModal movie={selectedMovie} genres={genres} onClose={() => setSelectedMovie(null)} />
-      )}
+      {selectedMovie && <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />}
     </div>
   )
 }

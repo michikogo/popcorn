@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react'
-import type { Movie, Genre } from '../types/tmdb'
+import type { Movie } from '../types/tmdb'
+import useMovie from '../hooks/useMovie'
 import getPosterUrl from '../api/getPosterUrl'
 import NoPoster from './NoPoster'
 
 interface Props {
   movie: Movie
-  genres: Genre[]
   onClose: () => void
 }
 
-const MovieModal = ({ movie, genres, onClose }: Props) => {
+const MovieModal = ({ movie, onClose }: Props) => {
+  const { movie: detail, loading, error } = useMovie(movie.id)
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -18,8 +20,9 @@ const MovieModal = ({ movie, genres, onClose }: Props) => {
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const movieGenres = genres.filter((g) => movie.genre_ids.includes(g.id))
-  const year = movie.release_date?.slice(0, 4)
+  const poster = detail?.poster_path ?? movie.poster_path
+  const year = (detail?.release_date ?? movie.release_date)?.slice(0, 4)
+  const rating = detail?.vote_average ?? movie.vote_average
 
   return (
     <div
@@ -27,7 +30,7 @@ const MovieModal = ({ movie, genres, onClose }: Props) => {
       onClick={onClose}
     >
       <div
-        className="relative flex w-full max-w-lg flex-col gap-6 rounded-2xl bg-zinc-900 p-6 shadow-2xl sm:flex-row"
+        className="relative flex w-full max-w-2xl flex-col gap-6 rounded-2xl bg-zinc-900 p-6 shadow-2xl sm:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -38,10 +41,10 @@ const MovieModal = ({ movie, genres, onClose }: Props) => {
           ✕
         </button>
 
-        <div className="w-full shrink-0 overflow-hidden rounded-xl sm:w-36">
-          {movie.poster_path ? (
+        <div className="w-full shrink-0 overflow-hidden rounded-xl sm:w-40">
+          {poster ? (
             <img
-              src={getPosterUrl(movie.poster_path)}
+              src={getPosterUrl(poster)}
               alt={movie.title}
               className="h-full w-full object-cover"
             />
@@ -53,17 +56,25 @@ const MovieModal = ({ movie, genres, onClose }: Props) => {
         </div>
 
         <div className="flex min-w-0 flex-col gap-3">
-          <h2 className="text-xl font-bold text-white leading-tight">{movie.title}</h2>
-
-          <div className="flex items-center gap-2">
-            <span className="text-yellow-400">★</span>
-            <span className="text-sm text-zinc-300">{movie.vote_average.toFixed(1)}</span>
-            {year && <span className="text-sm text-zinc-500">· {year}</span>}
+          <div>
+            <h2 className="text-xl font-bold leading-tight text-white">{movie.title}</h2>
+            {detail?.tagline && (
+              <p className="mt-1 text-sm italic text-zinc-400">{detail.tagline}</p>
+            )}
           </div>
 
-          {movieGenres.length > 0 && (
+          <div className="flex items-center gap-3 text-sm text-zinc-400">
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-400">★</span>
+              <span className="text-zinc-300">{rating.toFixed(1)}</span>
+            </span>
+            {year && <span>· {year}</span>}
+            {detail?.runtime ? <span>· {detail.runtime} min</span> : null}
+          </div>
+
+          {detail?.genres && detail.genres.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {movieGenres.map((g) => (
+              {detail.genres.map((g) => (
                 <span
                   key={g.id}
                   className="rounded-full bg-zinc-700 px-3 py-1 text-xs text-zinc-300"
@@ -72,6 +83,19 @@ const MovieModal = ({ movie, genres, onClose }: Props) => {
                 </span>
               ))}
             </div>
+          )}
+
+          {loading && (
+            <div className="flex items-center gap-2 text-sm text-zinc-500">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-zinc-300" />
+              Loading details…
+            </div>
+          )}
+
+          {error && <p className="text-sm text-red-400">{error}</p>}
+
+          {detail?.overview && (
+            <p className="text-sm leading-relaxed text-zinc-300">{detail.overview}</p>
           )}
         </div>
       </div>
