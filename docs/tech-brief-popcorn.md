@@ -1,6 +1,6 @@
 # Technical Brief: Popcorn
 
-**Status:** Draft  
+**Status:** Complete  
 **Date:** 2026-05-30  
 **Author:** Michiko Go  
 **Product Brief:** product-brief-popcorn.md  
@@ -18,20 +18,20 @@ Popcorn is a client-only movie discovery app that fetches data from the TMDB API
 Browser
   └── App
         ├── FilterBar (genre dropdown, year dropdown, sort dropdown)
-        └── MovieGrid
+        └── MovieGallery
               ├── MovieCard (× n)
               └── SkeletonCard (× n, shown during load)
 
 Data flow:
   useGenres → GET /genre/movie/list        → populates FilterBar genre options (once on mount)
-  useMovies → GET /discover/movie?params   → populates MovieGrid (re-fetches on filter/sort change)
+  useMovies → GET /discover/movie?params   → populates MovieGallery (re-fetches on filter/sort change)
 ```
 
 | Component                                                 | Type            | Role                                                             |
 | --------------------------------------------------------- | --------------- | ---------------------------------------------------------------- |
 | `App`                                                     | React component | Root — holds filter/sort state, passes to hooks and children     |
 | `FilterBar`                                               | React component | Genre dropdown, year dropdown, sort dropdown                     |
-| `MovieGrid`                                               | React component | Renders grid of `MovieCard` or `SkeletonCard`                    |
+| `MovieGallery`                                            | React component | Renders grid of `MovieCard` or `SkeletonCard`                    |
 | `MovieCard`                                               | React component | Poster, title, rating — tracks `imageLoaded` for shimmer fade-in |
 | `SkeletonCard`                                            | React component | Placeholder shown while `useMovies` is loading                   |
 | `useMovies`                                               | Custom hook     | Fetches `/discover/movie`, re-runs on filter/sort change         |
@@ -162,7 +162,7 @@ src/
   components/
     FilterBar.tsx
     MovieCard.tsx
-    MovieGrid.tsx
+    MovieGallery.tsx
     NoPoster.tsx       // inline SVG fallback for missing posters
     SkeletonCard.tsx
   hooks/
@@ -204,12 +204,12 @@ src/
 - **[PR #8](https://github.com/michikogo/popcorn/pull/8) — UI Components** ✅
   - `SkeletonCard` — shimmer placeholder card
   - `MovieCard` — poster, title, rating badge, hover effect (`hover:scale-105 hover:shadow-xl`), lazy image loading, shimmer fade-in on load
-  - `MovieGrid` — renders `MovieCard` grid, skeleton state, empty state, error state
+  - `MovieGallery` — renders `MovieCard` grid, skeleton state, empty state, error state
   - `App` — wired to `useMovies` with default sort for preview; FilterBar wiring in next MR
 
 - **[PR #9](https://github.com/michikogo/popcorn/pull/9) — FilterBar + App Wiring** ✅
   - `FilterBar` — genre dropdown, year dropdown (2020–2025), sort dropdown; stateless, props-driven
-  - `App` — holds filter/sort state, wires `useMovies` and `useGenres` to `FilterBar` and `MovieGrid`
+  - `App` — holds filter/sort state, wires `useMovies` and `useGenres` to `FilterBar` and `MovieGallery`
   - Shimmer keyframe added to `index.css`; skeleton count reduced to 10 (2 rows at desktop)
   - Default sort: `popularity.desc`
 

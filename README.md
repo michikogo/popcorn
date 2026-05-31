@@ -29,6 +29,7 @@ Browser
 - [Technical brief — Phase 2](docs/tech-brief-popcorn-phase2.md)
 - [Technical brief — Movie detail modal](docs/tech-brief-popcorn-modal.md)
 - [Technical brief — Test suite](docs/tech-brief-popcorn-tests.md)
+- [Production considerations](docs/production.md)
 - [Decision log](docs/decisions.md)
 - [Engineering notes](docs/engineering-notes.md)
 - [Known bugs](docs/bugs.md)
