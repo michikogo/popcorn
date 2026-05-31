@@ -10,7 +10,7 @@
 
 ## Overview
 
-Adds a detail modal that opens when a user clicks any movie card or list item. The modal displays the movie's poster, title, rating, release year, and genres using data already available from the discover response — no additional API call. Closes via ESC key or backdrop click.
+Adds a detail modal that opens when a user clicks any movie card or list item. The modal renders immediately with data already in memory (title, poster, rating, year), then enriches once a `/movie/{id}` fetch resolves with tagline, overview, runtime, and full genre names. Closes via ESC key, backdrop click, or the ✕ button.
 
 ---
 
@@ -18,9 +18,9 @@ Adds a detail modal that opens when a user clicks any movie card or list item. T
 
 ```
 MovieCard / MovieListItem
-  └── onClick prop → App.selectedMovie (useState<Movie | null>)
+  └── onClick → App.selectedMovie (useState<Movie | null>)
         └── MovieModal (renders when selectedMovie !== null)
-              ├── genres (passed from useGenres, already in App)
+              ├── useMovie(id) → TMDB /movie/{id}
               └── onClose → setSelectedMovie(null)
 ```
 
@@ -30,93 +30,113 @@ MovieCard / MovieListItem
 | `MovieGallery`  | Passthrough | Accepts `onMovieClick`, forwards it to each card/list item               |
 | `MovieCard`     | UI          | Grid tile; fires `onClick` prop on click                                 |
 | `MovieListItem` | UI          | List row; fires `onClick` prop on click                                  |
-| `MovieModal`    | UI          | Overlay with poster, title, rating, year, genre chips                    |
+| `MovieModal`    | UI          | Overlay; renders card data immediately, detail fields after fetch        |
+| `useMovie`      | Hook        | Fetches `/movie/{id}`, manages loading/error, AbortController on unmount |
+| `fetchMovie`    | API         | Wraps TMDB `/movie/{id}`, returns `MovieDetail`                          |
 
 ---
 
 ## Data Model
 
-The modal reuses the `Movie` type from the discover response — no new types or fetch:
+Two data shapes are used. `Movie` (from the discover response) is available immediately. `MovieDetail` (from the detail fetch) enriches the modal after the request resolves.
 
 ```
-Movie {
+Movie {                          // available immediately from discover
   id:            number
   title:         string
   poster_path:   string | null
   vote_average:  number
-  release_date:  string        // "YYYY-MM-DD" — modal slices [0,4] for year
-  genre_ids:     number[]      // cross-referenced with Genre[] from useGenres
+  release_date:  string          // "YYYY-MM-DD"
+  genre_ids:     number[]
 }
 
-Genre {
-  id:   number
-  name: string
+MovieDetail {                    // fetched from /movie/{id} on modal open
+  id:            number
+  title:         string
+  tagline:       string
+  overview:      string
+  runtime:       number | null
+  release_date:  string
+  vote_average:  number
+  poster_path:   string | null
+  genres:        { id: number; name: string }[]
 }
 ```
 
-Genre names are resolved client-side: `genres.filter(g => movie.genre_ids.includes(g.id))`. The `genres` array is already fetched by `useGenres` in `App` — no duplication.
+The modal falls back to `Movie` fields (poster, rating, year) while the detail fetch is in flight, so the user always sees something immediately.
 
 ---
 
 ## Key Decisions & Tradeoffs
 
-### No additional API fetch
+### Optimistic render with detail enrichment
 
-- **Chosen:** Display only the data already in the `Movie` object from `/discover/movie`
-- **Alternatives:** Fetch `/movie/{id}` on open to get overview, runtime, tagline, backdrop image
-- **Rationale:** The goal is to demonstrate click-to-modal interaction, not data richness. Keeping it zero-fetch avoids a loading state inside the modal, error handling, and a new hook — all scope that doesn't serve the demo objective
-- **Tradeoff:** Modal has no overview text or runtime. A real product would want those; this is straightforward to add later by wiring `useMovie` hook → `/movie/{id}`
-- **Reversible?** Yes — swapping to a detail fetch is additive: add the hook, extend the modal props
+- **Chosen:** Render title, poster, and rating from the existing `Movie` object immediately; show a spinner for the enriched fields (tagline, overview, runtime, genres) until `/movie/{id}` resolves
+- **Alternatives:** Show a full-screen loading state until the detail fetch completes
+- **Rationale:** The user clicked on a card they can already see — showing a blank modal or spinner while re-fetching data they just saw would feel slow. The optimistic render uses what's already in memory
+- **Tradeoff:** Two data sources means some fields (poster, rating) can briefly show the discover value before being replaced by the detail value. In practice these are identical
+- **Reversible?** Yes
 
-### State lives in App, not MovieGallery
+### Genres from detail response, not the discover list
 
-- **Chosen:** `selectedMovie: Movie | null` state in `App`; `MovieGallery` just receives `onMovieClick`
-- **Alternatives:** State in `MovieGallery` with modal rendered inside it
-- **Rationale:** The modal needs to render above the entire page (full-screen overlay), not scoped inside the gallery's DOM subtree. Keeping state in `App` also keeps `MovieGallery` a pure rendering component
+- **Chosen:** `MovieDetail.genres` (array of `{id, name}`) from `/movie/{id}` — no cross-referencing needed
+- **Alternatives:** Cross-reference `Movie.genre_ids` against the `Genre[]` array from `useGenres`
+- **Rationale:** The detail endpoint returns genre names directly, so there's no need to pass the app-level genre list into the modal
+- **Tradeoff:** Requires the detail fetch to complete before genres are shown
+- **Reversible?** Yes
+
+### State in `App`, not `MovieGallery`
+
+- **Chosen:** `selectedMovie: Movie | null` in `App`; `MovieGallery` is a passthrough
+- **Alternatives:** State in `MovieGallery`, modal rendered inside it
+- **Rationale:** The modal needs `fixed inset-0` over the entire page, not scoped inside the gallery's DOM subtree. `MovieGallery` stays a pure rendering component
 - **Tradeoff:** One extra prop thread (`onMovieClick`) through `MovieGallery` to each card
 - **Reversible?** Yes
 
-### No portal for modal DOM placement
+### No `ReactDOM.createPortal`
 
-- **Chosen:** Modal renders inline in `App`'s JSX, after the gallery
+- **Chosen:** Modal renders inline in `App`'s JSX after the gallery
 - **Alternatives:** `ReactDOM.createPortal` to `document.body`
-- **Rationale:** The modal uses `fixed inset-0` positioning — it escapes the layout stack regardless of DOM placement. A portal adds complexity (ref management, hydration edge cases) with no visual benefit for a single-page app at this scale
-- **Tradeoff:** If a parent ever sets `transform` or `filter` on the app container, `fixed` positioning breaks. Not a concern here
-- **Reversible?** Yes — wrapping in a portal is a one-line change
+- **Rationale:** `fixed inset-0` positioning escapes the layout stack regardless of DOM placement. A portal adds complexity (ref management, hydration edge cases) with no visual benefit at this scale
+- **Tradeoff:** If a parent ever applies `transform` or `filter` to the app container, `fixed` positioning breaks. Not a concern here
+- **Reversible?** Yes — one-line change
 
-### Close on ESC and backdrop click, no close button required
+### Body scroll lock on mount
 
-- **Chosen:** ESC via `keydown` listener + backdrop `onClick`; close button present as a secondary affordance (✕ in top-right)
-- **Alternatives:** Close button only
-- **Rationale:** Standard modal UX — keyboard and pointer users both get a natural exit path. `e.stopPropagation()` on the modal card prevents backdrop handler firing on inner clicks
+- **Chosen:** `document.body.style.overflow = 'hidden'` on mount, restored on unmount
+- **Rationale:** Without this the background page scrolls while the modal is open (BUG-001)
+- **Tradeoff:** Inline style over a CSS class — self-contained, cleans up reliably on unmount, no global stylesheet entry needed
 
 ---
 
 ## Edge Cases & Error Handling
 
-| Scenario                                 | Expected Behavior                                                          |
-| ---------------------------------------- | -------------------------------------------------------------------------- |
-| `poster_path` is null                    | `NoPoster` component renders in place of `<img>`                           |
-| `genre_ids` don't match any loaded genre | Genre chip section is omitted (empty array → no render)                    |
-| `release_date` is empty string           | Year display is skipped (`?.slice(0, 4)` returns undefined → not rendered) |
-| User clicks inside modal, not backdrop   | `e.stopPropagation()` on modal card prevents close                         |
-| Filter changes while modal is open       | Modal stays open — `selectedMovie` is not tied to filter state             |
+| Scenario                               | Expected Behavior                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------- |
+| `poster_path` is null                  | `NoPoster` component renders in place of `<img>`                           |
+| Detail fetch fails                     | Error message renders; title, rating, year from card data still visible    |
+| `release_date` is empty string         | Year display is skipped (`?.slice(0, 4)` returns undefined → not rendered) |
+| `runtime` is null                      | Runtime field is omitted from the metadata row                             |
+| No tagline                             | Tagline element is not rendered                                            |
+| User clicks inside modal, not backdrop | `e.stopPropagation()` on modal card prevents close                         |
+| Filter changes while modal is open     | Modal stays open — `selectedMovie` is not tied to filter state             |
+| Viewport < 640px                       | Poster renders at fixed 192px centered; modal scrolls internally (BUG-002) |
 
 ---
 
 ## Development Phases
 
-This feature shipped in a single MR:
+- **[PR #20](https://github.com/michikogo/popcorn/pull/20) — Movie Detail Modal (initial)** ✅
+  - `MovieModal.tsx` — poster, title, rating, year, genre chips; ESC + backdrop close
+  - `MovieCard.tsx` / `MovieListItem.tsx` — added `onClick` prop
+  - `MovieGallery.tsx` — added `onMovieClick`, forwarded to cards
+  - `App.tsx` — `selectedMovie` state, renders modal
 
-- **MR 1 — Movie Detail Modal**
-  - `MovieModal.tsx` — new component: poster, title, rating, year, genre chips, ESC + backdrop close
-  - `MovieCard.tsx` — added `onClick: () => void` prop
-  - `MovieListItem.tsx` — added `onClick: () => void` prop
-  - `MovieGallery.tsx` — added `onMovieClick: (movie: Movie) => void`, forwarded to cards
-  - `App.tsx` — added `selectedMovie` state, wired `onMovieClick`, renders `MovieModal`
+- **[PR #21](https://github.com/michikogo/popcorn/pull/21) — Detail fetch enrichment** ✅
+  - `fetchMovie.ts` — new API function for `/movie/{id}`
+  - `useMovie.ts` — new hook; getDerivedStateFromProps reset on id change
+  - `MovieModal.tsx` — optimistic render + detail enrichment; tagline, overview, runtime
 
-## Open Questions
-
-| Question                                              | Owner   | Due                    |
-| ----------------------------------------------------- | ------- | ---------------------- |
-| Add movie overview + runtime via `/movie/{id}` fetch? | Michiko | If taken to production |
+- **[PR #22](https://github.com/michikogo/popcorn/pull/22) — Bug fixes** ✅
+  - BUG-001: body scroll lock on modal mount
+  - BUG-002: poster width constraint on mobile viewports
