@@ -37,7 +37,8 @@ const MovieModal = ({ movie, onClose }: Props) => {
       onClick={onClose}
     >
       <div
-        className="relative flex w-full max-w-2xl flex-col gap-6 rounded-2xl bg-zinc-900 p-6 shadow-2xl sm:flex-row"
+        className="relative flex w-full max-w-2xl flex-col gap-6 overflow-y-auto rounded-2xl bg-zinc-900 p-6 shadow-2xl sm:flex-row"
+        style={{ maxHeight: '90svh' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -48,7 +49,7 @@ const MovieModal = ({ movie, onClose }: Props) => {
           ✕
         </button>
 
-        <div className="w-full shrink-0 overflow-hidden rounded-xl sm:w-40">
+        <div className="mx-auto w-48 shrink-0 overflow-hidden rounded-xl sm:mx-0 sm:w-40">
           {poster ? (
             <img
               src={getPosterUrl(poster)}
