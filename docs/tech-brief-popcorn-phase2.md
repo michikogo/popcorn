@@ -193,6 +193,6 @@ New/changed params:
 
 ## Open Questions
 
-| Question                                                                                 | Owner   | Due               |
-| ---------------------------------------------------------------------------------------- | ------- | ----------------- |
-| Virtualization threshold — at what card count do we introduce `@tanstack/react-virtual`? | Michiko | Before MR 4 ships |
+| Question                                                                                 | Owner   | Status                                        |
+| ---------------------------------------------------------------------------------------- | ------- | --------------------------------------------- |
+| Virtualization threshold — at what card count do we introduce `@tanstack/react-virtual`? | Michiko | Closed — out of scope for this take-home demo |

@@ -192,6 +192,6 @@ await waitFor(() => expect(result.current.loading).toBe(false))
 
 ## Open Questions
 
-| Question                                      | Owner   | Due               |
-| --------------------------------------------- | ------- | ----------------- |
-| Add coverage thresholds to CI (`--coverage`)? | Michiko | Before MR 1 ships |
+| Question                                      | Owner   | Status                                        |
+| --------------------------------------------- | ------- | --------------------------------------------- |
+| Add coverage thresholds to CI (`--coverage`)? | Michiko | Closed — out of scope for this take-home demo |
