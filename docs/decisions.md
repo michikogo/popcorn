@@ -73,3 +73,59 @@ The following were deliberately deferred to Phase 2 to keep Phase 1 focused on t
 - **Infinite scroll** — Phase 1 fetches the first page only (20 results), aligned with the assignment's "first page is sufficient" guidance. Phase 2 adds scroll-triggered pagination.
 - **Year range filter** — Phase 1 uses a single year dropdown (2020–2025). Phase 2 replaces it with a from/to range picker for more expressive filtering.
 - **List view layout** — Phase 1 is grid-only. Phase 2 adds a horizontal list layout with a toggle, satisfying the assignment's "different layout option" extra.
+
+---
+
+## Tech Brief — Phase 2 (ref: [tech-brief-popcorn-phase2.md](tech-brief-popcorn-phase2.md))
+
+### IntersectionObserver over scroll event listener
+
+**Decision:** Use `IntersectionObserver` with a sentinel `<div>` at the bottom of the gallery to trigger infinite scroll pagination.
+
+**Reasoning:** A `scroll` event listener fires continuously on every scroll frame and requires manual throttling to avoid performance issues. `IntersectionObserver` fires exactly once when the sentinel enters the viewport — no throttle needed, no scroll math, and cleanup is a single `observer.disconnect()` call.
+
+**Tradeoff:** `rootMargin` tuning is required to get the prefetch timing right. We use `500px` to start loading the next page before the user actually reaches the bottom — aggressive but intentional.
+
+---
+
+### getDerivedStateFromProps for filter reset
+
+**Decision:** Reset movie list, page, and loading state during the render cycle (not inside a `useEffect`) when filter params change.
+
+**Context:** The `react-hooks/set-state-in-effect` lint rule blocks synchronous `setState` calls at the top of effect bodies. The naive fix — a dedicated `useEffect` for resets — causes a stale render frame where the old movie list is briefly visible after a filter change.
+
+**Reasoning:** React explicitly supports calling `setState` during render when guarded by a condition that becomes false on the next render (the getDerivedStateFromProps pattern). This resets state synchronously as part of the render that processes the new filter, eliminating the stale frame and satisfying the lint rule.
+
+**Tradeoff:** Less familiar pattern than a `useEffect` reset — documented in `engineering-notes.md` to avoid future confusion.
+
+---
+
+## Tech Brief — Movie Detail Modal (ref: [tech-brief-popcorn-modal.md](tech-brief-popcorn-modal.md))
+
+### Optimistic render with detail enrichment
+
+**Decision:** Render the modal immediately with data already in memory (title, poster, rating, year from the discover response), then enrich with a `/movie/{id}` fetch that adds tagline, overview, runtime, and genre names.
+
+**Reasoning:** The user just clicked a card they can see — showing a blank modal or full-screen spinner while re-fetching data they already viewed would feel slow. The optimistic render gives instant feedback; the enriched fields appear as they load.
+
+**Tradeoff:** Two data sources (discover response + detail response) means some fields briefly show discover values before being replaced by detail values. In practice poster, rating, and year are identical between the two responses.
+
+---
+
+## Tech Brief — Test Suite (ref: [tech-brief-popcorn-tests.md](tech-brief-popcorn-tests.md))
+
+### Vitest over Jest
+
+**Decision:** Use Vitest as the test runner instead of Jest.
+
+**Reasoning:** Vitest runs inside the same Vite pipeline the project already uses. `import.meta.env`, TypeScript path aliases, and ESM modules all work without additional transformer config. Jest requires `babel-jest` or `ts-jest`, manual ESM configuration, and Vite-specific workarounds for environment variables — significant setup overhead for no functional benefit.
+
+**Tradeoff:** Vitest is newer than Jest and has fewer community answers for edge cases. The API mirrors Jest closely enough that migration is mechanical if needed.
+
+### `vi.fn()` over MSW for fetch mocking
+
+**Decision:** Mock `globalThis.fetch` with `vi.fn()` per test rather than using Mock Service Worker.
+
+**Reasoning:** Tests target individual modules in isolation — a single hook or API function. Fine-grained `vi.fn()` control is simpler and more explicit at this scope. MSW introduces service worker setup, a handlers file, and lifecycle hooks that add meaningful overhead when the goal is unit-level isolation.
+
+**Tradeoff:** If future tests need to verify the full request/response cycle across multiple components simultaneously, MSW is the right upgrade path.
