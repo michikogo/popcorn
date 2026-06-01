@@ -8,7 +8,9 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
-## Server-side vs client-side sort and filter
+## Tech Brief — Phase 1 (ref: [tech-brief-popcorn.md](tech-brief-popcorn.md))
+
+### Server-side vs client-side sort and filter
 
 **Decision:** Server-side — pass `sort_by`, `with_genres`, and `primary_release_year` directly to the TMDB API.
 
@@ -20,7 +22,7 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
-## No backend / client-only architecture
+### No backend / client-only architecture
 
 **Decision:** All API calls go directly from the browser to TMDB. No proxy or backend server.
 
@@ -30,7 +32,7 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
-## Separate `useMovies` and `useGenres` hooks
+### Separate `useMovies` and `useGenres` hooks
 
 **Decision:** Two hooks with distinct fetch responsibilities instead of one combined hook.
 
@@ -40,7 +42,7 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
-## Image performance strategy
+### Image performance strategy
 
 **Decision:** Three-layer approach to keep image loading fast and non-blocking.
 
@@ -54,7 +56,7 @@ A running log of engineering decisions made during the design and build of Popco
 
 ---
 
-## Layout toggle icons: unicode over an icon library
+### Layout toggle icons: unicode over an icon library
 
 **Decision:** Use unicode characters (⊞ for grid, ☰ for list) in the `FilterBar` layout toggle instead of an icon library.
 
@@ -63,16 +65,6 @@ A running log of engineering decisions made during the design and build of Popco
 **Reasoning:** For two small toggle buttons, adding a dependency is unnecessary. The unicode characters are universally supported, visually clear, and require zero setup. Heroicons remains the right choice if more icons are needed elsewhere in the app.
 
 **Tradeoff:** Slightly less refined visually than SVG icons. Easy to swap if the bar for icon quality is raised.
-
----
-
-## Phase 2 scope decisions
-
-The following were deliberately deferred to Phase 2 to keep Phase 1 focused on the core assignment requirements:
-
-- **Infinite scroll** — Phase 1 fetches the first page only (20 results), aligned with the assignment's "first page is sufficient" guidance. Phase 2 adds scroll-triggered pagination.
-- **Year range filter** — Phase 1 uses a single year dropdown (2020–2025). Phase 2 replaces it with a from/to range picker for more expressive filtering.
-- **List view layout** — Phase 1 is grid-only. Phase 2 adds a horizontal list layout with a toggle, satisfying the assignment's "different layout option" extra.
 
 ---
 
